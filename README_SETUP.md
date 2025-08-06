@@ -43,6 +43,7 @@ Azure Functions app that fetches Belgian train data from iRail API and stores it
 
 ## 🧪 Functions Deployed
 - **HTTP**: `/api/trains?station=<station-name` - On-demand data fetch
+- **Timer**: Every 15 minutes - Automated collection for 5 major stations
 
 ## 🎯 Key Decisions Made
 
@@ -54,6 +55,7 @@ Azure Functions app that fetches Belgian train data from iRail API and stores it
 
 ## 📊 Current Status
 ✅ Deployed and running on Azure  
+✅ Collecting data every 15 minutes  
 ✅ Processing ~40-50 train records per station  
 ✅ Robust error handling and validation
 

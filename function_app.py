@@ -348,3 +348,45 @@ def fetch_train_data(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             mimetype="application/json",
         )
+
+@app.function_name("health_check")
+@app.route(route="health", auth_level=func.AuthLevel.ANONYMOUS)
+def health_check(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Azure Function to check the health of the service
+    """
+    logging.info("Health check function processed a request.")
+
+    try:
+        return func.HttpResponse(
+            json.dumps({"status": "healthy"}),
+            status_code=200,
+            mimetype="application/json"
+        )
+
+    except Exception as e:
+        logging.error(f"Unexpected error in health check function: {e}")
+        return func.HttpResponse(
+            json.dumps({"status": "error", "message": "Internal server error"}),
+            status_code=500,
+            mimetype="application/json",
+        )
+
+@app.function_name("timer_trigger")
+@app.timer_trigger(schedule="0 */15 * * * *", arg_name="mytimer", run_on_startup=False)
+def timer_trigger(mytimer: func.TimerRequest) -> None:
+    """
+    Timer trigger function to periodically fetch train data
+    """
+    logging.info("Timer trigger function started.")
+
+    try:
+        processor = TrainDataProcessor()
+        # Main stations periodic updates
+        stations = ["Brussels-Central", "Antwerp-Central", "Ghent-Saint-Peter's"]
+        for station in stations:
+            result = processor.process_station_data(station)
+            logging.info(f"Processed {station}: {result['message']}")
+
+    except Exception as e:
+        logging.error(f"Error in timer trigger function: {e}")
