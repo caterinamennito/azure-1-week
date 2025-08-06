@@ -1,0 +1,40 @@
+name: Build and Deploy Azure Function (Docker)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push Docker image
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }}
+
+      - name: Deploy to Azure Function App (Container)
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: trains-app
+          images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }}
