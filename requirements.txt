@@ -1,0 +1,5 @@
+azure-functions==1.15.0
+requests
+pyodbc
+pandas
+python-dotenv

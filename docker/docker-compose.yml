@@ -1,0 +1,16 @@
+services:
+  azure-functions:
+    build: .. 
+    platform: linux/amd64 
+    ports:
+      - "7071:80"
+    environment:
+      - AzureWebJobsStorage=UseDevelopmentStorage=true
+      - FUNCTIONS_WORKER_RUNTIME=python
+      - AzureWebJobsScriptRoot=/home/site/wwwroot
+      - AzureFunctionsJobHost__Logging__Console__IsEnabled=true
+    env_file:
+      - .env
+    volumes:
+      # Mount your code directory for live updates
+      - ../:/home/site/wwwroot:ro
