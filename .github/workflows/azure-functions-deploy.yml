@@ -37,8 +37,12 @@ jobs:
         run: |
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }}
 
-      - name: Deploy to Azure Function App (Container)
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: trains-app
-          images: ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }}
+      - name: Deploy container image to Azure Function App
+        run: |
+          az functionapp config container set \
+            --name trains-app \
+            --resource-group trains-app_group \
+            --image ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }} \
+            --registry-server ${{ secrets.REGISTRY_LOGIN_SERVER }} \
+            --registry-username ${{ secrets.REGISTRY_USERNAME }} \
+            --registry-password ${{ secrets.REGISTRY_PASSWORD }}
