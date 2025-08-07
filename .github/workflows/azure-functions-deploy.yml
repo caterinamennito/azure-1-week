@@ -21,25 +21,20 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          
-      - name: Build and push Docker image
-        uses: azure/docker-login@v1
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+          python-version: '3.10'
 
-      - name: Build Docker image
+      - name: Install dependencies
         run: |
-          docker build -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }} .
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --target .python_packages/lib/site-packages
 
-      - name: Push Docker image
-        run: |
-          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }}
-
-      - name: Deploy container image to Azure Function App (Flex Consumption)
-        run: |
-          az functionapp update \
-            --name trains-app \
-            --resource-group trains-app_group \
-            --set siteConfig.linuxFxVersion="DOCKER|${{ secrets.REGISTRY_LOGIN_SERVER }}/train-func:${{ github.sha }}"
+      - name: Deploy to Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: trains-app
+          package: .
+          scm-do-build-during-deployment: false
