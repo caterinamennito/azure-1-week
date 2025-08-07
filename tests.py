@@ -14,6 +14,7 @@ class TestHealthCheck(unittest.TestCase):
         
         response = health_check(req)
         
+        print(response)
         # Assert
         self.assertIsInstance(response, func.HttpResponse)
         self.assertEqual(response.status_code, 200)
